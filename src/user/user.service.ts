@@ -20,7 +20,14 @@ export class UserService {
     return this.userModel.create({ ...userDto });
   }
 
-  login(userDto: LoginDto) {
-    return;
+  async login(userDto: LoginDto) {
+    const user = await this.userModel.findOne({
+      email: userDto.email,
+      password: userDto.password,
+    });
+    if (!user) {
+      throw new HttpException('notUser', HttpStatus.BAD_REQUEST);
+    }
+    return user;
   }
 }
