@@ -21,12 +21,12 @@ export class UserService {
   }
 
   async login(userDto: LoginDto) {
-    const user = await this.userModel.findOne({
-      email: userDto.email,
-      password: userDto.password,
-    });
+    const user = await this.userModel.findOne({ email: userDto.email });
     if (!user) {
       throw new HttpException('notUser', HttpStatus.BAD_REQUEST);
+    }
+    if (user.password !== userDto.password) {
+      throw new HttpException('passwordIncorrect', HttpStatus.BAD_REQUEST);
     }
     return user;
   }
