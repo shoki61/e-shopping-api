@@ -22,10 +22,17 @@ export class UserService {
       throw new HttpException('existEmail', HttpStatus.BAD_REQUEST);
     }
     const code = await this.generateVerificationCode();
-    await Promise.all([
+    const [mail, user] = await Promise.all([
       sendVerificationCode(userDto.email, code),
       this.userModel.create({ ...userDto, verificationCode: code }),
     ]);
+    if (!mail) {
+      throw new HttpException('mailError', HttpStatus.BAD_REQUEST);
+    }
+    if (!user) {
+      throw new HttpException('userError', HttpStatus.BAD_REQUEST);
+    }
+    return user;
   }
 
   async login(userDto: LoginDto) {
