@@ -72,4 +72,9 @@ export class UserService {
     await user.save();
     return user;
   }
+
+  async getAllUsers() {
+    const users = await this.userModel.find({});
+    return users;
+  }
 }

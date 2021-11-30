@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 
 import { UserService } from './user.service';
 import { SignUpDto } from './dto/SignUpDto';
@@ -24,5 +24,10 @@ export class UserController {
     @Param('verificationCode') verificationCode: string,
   ) {
     return this.userService.verifyEmail(email, verificationCode);
+  }
+
+  @Get('all_users')
+  getAllUsers() {
+    return this.userService.getAllUsers();
   }
 }

@@ -1,15 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type MessageDocument = Message & Document;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Message {
-  @Prop({ required: true, type: String })
-  sender: string;
+  @Prop()
+  conversationId: Types.ObjectId;
 
-  @Prop({ required: true, type: String })
-  recipient: string;
+  @Prop({ ref: 'user' })
+  sender: Types.ObjectId;
 
   @Prop({ required: true, type: String })
   text: string;
