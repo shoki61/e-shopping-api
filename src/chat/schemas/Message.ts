@@ -8,7 +8,7 @@ export class Message {
   @Prop()
   conversationId: Types.ObjectId;
 
-  @Prop({ ref: 'user' })
+  @Prop({ ref: 'users' })
   sender: Types.ObjectId;
 
   @Prop({ required: true, type: String })

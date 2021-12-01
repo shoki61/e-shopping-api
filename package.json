@@ -27,6 +27,7 @@
     "@nestjs/mongoose": "^9.0.1",
     "@nestjs/platform-express": "^7.6.15",
     "@nestjs/platform-socket.io": "^8.2.3",
+    "@nestjs/swagger": "^5.1.5",
     "@nestjs/websockets": "^8.2.3",
     "@sendgrid/mail": "^7.6.0",
     "@typegoose/typegoose": "^9.2.0",

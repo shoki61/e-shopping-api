@@ -7,6 +7,7 @@ import {
   Message,
   MessageDocument,
 } from './schemas';
+import { User, UserDocument } from 'src/user/schemas';
 
 @Injectable()
 export class ChatService {
@@ -14,15 +15,15 @@ export class ChatService {
     @InjectModel(Message.name) private messageModel: Model<MessageDocument>,
     @InjectModel(Conversation.name)
     private conversationModel: Model<ConversationDocument>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
   async createConversation(senderId: string, receiverId: string) {
     const existingConversation = await this.conversationModel.findOne({
       members: [senderId, receiverId],
     });
-    console.log(existingConversation);
     if (existingConversation) {
-      return;
+      return existingConversation;
     }
     const conversation = await this.conversationModel.create({
       members: [senderId, receiverId],
@@ -43,7 +44,7 @@ export class ChatService {
   async sendMessage(conversationId: string, senderId: string, text: string) {
     const newMessage = await this.messageModel.create({
       conversationId: new Types.ObjectId(conversationId),
-      sender: new Types.ObjectId(senderId),
+      sender: senderId,
       text,
     });
     if (!newMessage) {
