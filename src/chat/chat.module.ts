@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from 'src/user/schemas';
-// import { ChatGateway } from './chat.gateway';
+import { ChatGateway } from './chat.gateway';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
 import {
@@ -20,6 +20,6 @@ import {
     ]),
   ],
   controllers: [ChatController],
-  providers: [ChatService],
+  providers: [ChatService, ChatGateway],
 })
 export class ChatModule {}

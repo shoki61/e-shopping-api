@@ -6,67 +6,70 @@ import {
   OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
+  WebSocketServer,
 } from '@nestjs/websockets';
-// import { ChatService } from './chat.service';
-import { Bind, Logger, UseInterceptors } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Message } from './schemas';
 import { Model } from 'mongoose';
 import { User } from '../user/schemas';
-import { Socket } from 'socket.io';
+import { Socket, Server } from 'socket.io';
 
-// @WebSocketGateway()
-// export class ChatGateway
-//   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-// {
-//   constructor(
-//     @InjectModel(Message.name) private messageModel: Model<Message>,
-//     @InjectModel(User.name) private userModel: Model<User>,
-//   ) {}
+@WebSocketGateway(3030, { cors: true })
+export class ChatGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
+  constructor(
+    @InjectModel(Message.name) private messageModel: Model<Message>,
+    @InjectModel(User.name) private userModel: Model<User>,
+  ) {}
 
-//   // @WebSocketServer()
-//   // readonly server: Server;
+  @WebSocketServer()
+  readonly server: Server;
 
-//   private readonly logger: Logger = new Logger(ChatGateway.name);
+  private readonly logger: Logger = new Logger(ChatGateway.name);
 
-//   async handleDisconnect(client: Socket) {
-//     const user = await this.userModel.findOne({ _id: client.id });
-//     if (user) {
-//       this.logger.log(`Disconnect the ${client.id}`);
-//     }
-//   }
+  onlineUsers: { userId: string; socketId: string }[] = [];
 
-//   // @SubscribeMessage('add-message')
-//   // async addMessage(client: Socket, message: Message) {
-//   //   message = await this.messageModel.create(message);
-//   //   // this.server.to(message.recipient).emit('new_message', message);
-//   // }
+  private readonly getUserFromSocket = (userId: string) =>
+    this.onlineUsers.find((user) => user.userId === userId);
 
-//   // @SubscribeMessage('events')
-//   // handleEvent(client: any, data: string): string {
-//   //   return data;
-//   // }
+  afterInit() {
+    this.logger.log('Started Socket Server');
+  }
 
-//   // afterInit(server: any) {
-//   //   console.log('Init');
-//   // }
+  handleConnection(client: Socket) {
+    this.logger.log(`User Connection ${client.id}`);
+  }
 
-//   // handleConnection(socket: any) {
-//   //   const query = socket.handshake.query;
-//   //   console.log('Connect', query);
-//   //   // this.chatService.userConnected(query.userName, query.registrationToken);
-//   //   // process.nextTick(async () => {
-//   //   //   socket.emit('allChats', await this.chatService.getChats());
-//   //   // });
-//   // }
+  handleDisconnect(client: Socket) {
+    this.logger.log(`User Disconnect ${client.id}`);
+    this.onlineUsers = this.onlineUsers.filter(
+      ({ socketId }) => socketId !== client.id,
+    );
+    this.server.emit('onlineUsers', this.onlineUsers);
+  }
 
-//   // @Bind(MessageBody(), ConnectedSocket())
-//   // @SubscribeMessage('chat')
-//   // async handleNewMessage(chat: any, sender: any) {
-//   //   console.log('New Chat', chat);
-//   //   // await this.chatService.saveChat(chat);
-//   //   sender.emit('newChat', chat);
-//   //   sender.broadcast.emit('newChat', chat);
-//   //   // await this.chatService.sendMessagesToOfflineUsers(chat);
-//   // }
-// }
+  @SubscribeMessage('addUser')
+  addUser(@MessageBody() userId: string, @ConnectedSocket() socket: Socket) {
+    if (!this.onlineUsers.some((user) => user.userId === userId)) {
+      this.onlineUsers.push({ userId, socketId: socket.id });
+    }
+    this.server.emit('onlineUsers', this.onlineUsers);
+    console.log(this.onlineUsers);
+  }
+
+  @SubscribeMessage('sendMessage')
+  sendMessage(
+    @MessageBody()
+    messageDto: { senderId: string; receiverId: string; text: string },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    const { senderId, receiverId, text } = messageDto;
+    console.log(senderId, receiverId);
+    const user = this.getUserFromSocket(receiverId);
+    this.server.to(user.socketId).emit('getMessage', { senderId, text });
+    console.log(this.onlineUsers);
+    console.log(user.socketId);
+  }
+}
