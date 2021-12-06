@@ -56,7 +56,6 @@ export class ChatGateway
       this.onlineUsers.push({ userId, socketId: socket.id });
     }
     this.server.emit('onlineUsers', this.onlineUsers);
-    console.log(this.onlineUsers);
   }
 
   @SubscribeMessage('sendMessage')
@@ -66,10 +65,29 @@ export class ChatGateway
     @ConnectedSocket() socket: Socket,
   ) {
     const { senderId, receiverId, text } = messageDto;
-    console.log(senderId, receiverId);
     const user = this.getUserFromSocket(receiverId);
     this.server.to(user.socketId).emit('getMessage', { senderId, text });
-    console.log(this.onlineUsers);
-    console.log(user.socketId);
+  }
+
+  @SubscribeMessage('typing')
+  typing(
+    @MessageBody()
+    messageDto: { receiverId: string },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    const { receiverId } = messageDto;
+    const user = this.getUserFromSocket(receiverId);
+    this.server.to(user.socketId).emit('startTyping');
+  }
+
+  @SubscribeMessage('endedTyping')
+  endedTyping(
+    @MessageBody()
+    messageDto: { receiverId: string },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    const { receiverId } = messageDto;
+    const user = this.getUserFromSocket(receiverId);
+    this.server.to(user.socketId).emit('endTyping');
   }
 }
