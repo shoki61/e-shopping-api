@@ -10,10 +10,11 @@ import {
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Message } from './schemas';
-import { Model } from 'mongoose';
-import { User } from '../user/schemas';
 import { Socket, Server } from 'socket.io';
+import { Model } from 'mongoose';
+
+import { Message } from './schemas';
+import { User } from '../user/schemas';
 
 @WebSocketGateway(3030, { cors: true })
 export class ChatGateway
