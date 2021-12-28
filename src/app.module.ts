@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 
 import { UserModule } from './user/user.module';
 import { ChatModule } from './chat/chat.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ChatModule } from './chat/chat.module';
     }),
     UserModule,
     ChatModule,
+    ProductModule,
   ],
   providers: [],
 })
