@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 
 import { Categories, MainCategories, SubCategories } from './constants';
-import { ProductDto } from './dto';
+import { ProductDto, FilterDto } from './dto';
 import { ProductService } from './product.service';
 
 @Controller('product')
@@ -44,17 +44,9 @@ export class ProductController {
     );
   }
 
-  @Get('/:mainCategory/:category/:subCategory')
-  getSimilarProduct(
-    @Param('mainCategory') mainCategory: MainCategories,
-    @Param('category') category: Categories,
-    @Param('subCategory') subCategory: SubCategories,
-  ) {
-    return this.productService.getSimilarProduct(
-      mainCategory,
-      category,
-      subCategory,
-    );
+  @Get('/filter')
+  getFiltered(@Body() filterContent: FilterDto) {
+    return this.productService.getFiltered(filterContent);
   }
 
   @Post('/create')

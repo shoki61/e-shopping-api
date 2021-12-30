@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import { Categories, MainCategories, SubCategories } from '../constants';
+import { Categories, MainCategories, Sizes, SubCategories } from '../constants';
 
 export type ProductDocument = Product & Document;
 
@@ -35,6 +35,12 @@ export class Product {
 
   @Prop({ required: true, type: String })
   seller: string;
+
+  @Prop({ required: true, enum: Sizes })
+  size: Sizes;
+
+  @Prop({ required: true, type: String })
+  mark: string;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

@@ -1,3 +1,11 @@
+export enum Sizes {
+  XS = 'XS',
+  S = 'S',
+  M = 'M',
+  L = 'L',
+  XL = 'XL',
+}
+
 export enum MainCategories {
   MAN = 'MAN',
   WOMAN = 'WOMAN',

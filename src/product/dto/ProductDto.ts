@@ -1,5 +1,6 @@
 import { IsArray, IsEnum, IsNumber, IsString } from 'class-validator';
-import { Categories, MainCategories, SubCategories } from '../constants';
+
+import { Categories, MainCategories, Sizes, SubCategories } from '../constants';
 
 export class ProductDto {
   @IsString()
@@ -31,4 +32,10 @@ export class ProductDto {
 
   @IsString()
   seller: string;
+
+  @IsEnum(Sizes)
+  size: Sizes;
+
+  @IsString()
+  mark: string;
 }

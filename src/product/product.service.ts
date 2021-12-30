@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Categories, MainCategories, SubCategories } from './constants';
-import { ProductDto } from './dto';
+import { ProductDto, FilterDto } from './dto';
 import { Product, ProductDocument } from './schemas';
 
 @Injectable()
@@ -18,18 +18,19 @@ export class ProductService {
   }
 
   async getMainCategory(mainCategory: MainCategories) {
-    const products = await this.productModal.find({ mainCategory });
-    return products;
+    const [products, similarProducts] = await Promise.all([
+      this.productModal.find({ mainCategory }),
+      this.productModal.find({ mainCategory }).limit(30),
+    ]);
+    return { products, similarProducts };
   }
 
   async getCategory(mainCategory: MainCategories, category: Categories) {
-    const products = await this.productModal.find({ mainCategory, category });
-    return products;
-  }
-
-  async getProductDetail(productId: string) {
-    const product = await this.productModal.findById({ _id: productId });
-    return product;
+    const [products, similarProducts] = await Promise.all([
+      this.productModal.find({ mainCategory, category }),
+      this.productModal.find({ mainCategory, category }).limit(30),
+    ]);
+    return { products, similarProducts };
   }
 
   async getSubCategory(
@@ -37,29 +38,41 @@ export class ProductService {
     category: Categories,
     subCategory: SubCategories,
   ) {
-    const subCategoryProducts = await this.productModal.find({
-      mainCategory,
-      category,
-      subCategory,
-    });
-
-    return subCategoryProducts;
-  }
-
-  async getSimilarProduct(
-    mainCategory: MainCategories,
-    category: Categories,
-    subCategory: SubCategories,
-  ) {
-    const similarProducts = await this.productModal
-      .find({
+    const [products, similarProducts] = await Promise.all([
+      this.productModal.find({
         mainCategory,
         category,
         subCategory,
+      }),
+      this.productModal.find({ mainCategory, category, subCategory }).limit(30),
+    ]);
+
+    return { products, similarProducts };
+  }
+
+  async getProductDetail(productId: string) {
+    const product = await this.productModal.findById({ _id: productId });
+    const similarProducts = await this.productModal
+      .find({
+        mainCategory: product.mainCategory,
+        category: product.category,
+        subCategory: product.subCategory,
       })
       .limit(30);
+    return { product, similarProducts };
+  }
 
-    return similarProducts;
+  async getFiltered(filterContent: FilterDto) {
+    const {
+      sizes = null,
+      colors = null,
+      marks = null,
+      prices = null,
+    } = filterContent;
+    console.log('///////////////////////');
+    console.log(filterContent);
+    // const products = await this.productModal.find({ ...filterContent });
+    // return products;
   }
 
   async createProduct(product: ProductDto) {
